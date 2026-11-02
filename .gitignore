@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+!.env.example
+*.log
+coverage/
+.vitest/
+prisma/*.db
+prisma/*.db-journal
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
