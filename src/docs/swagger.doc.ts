@@ -1,0 +1,369 @@
+export const swaggerDocument = {
+  openapi: '3.0.3',
+  info: {
+    title: 'SupportDesk Agent API',
+    version: '1.0.0',
+    description:
+      'Production-minded backend service for SupportDesk Agent, an AI-powered customer support ticket triage application leveraging Google Gemini Function Calling.',
+  },
+  servers: [
+    {
+      url: 'http://localhost:5000',
+      description: 'Local development server',
+    },
+  ],
+  paths: {
+    '/api/health': {
+      get: {
+        summary: 'Health Check Probe',
+        description: 'Returns backend health status, uptime, and PostgreSQL database connectivity.',
+        responses: {
+          '200': {
+            description: 'Service is healthy and database is connected',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/HealthResponse',
+                },
+              },
+            },
+          },
+          '503': {
+            description: 'Service is degraded (e.g., database disconnected)',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/HealthResponse',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/tickets': {
+      get: {
+        summary: 'List Tickets',
+        description: 'Retrieves all customer tickets, optionally filtered by status and search terms.',
+        parameters: [
+          {
+            name: 'status',
+            in: 'query',
+            required: false,
+            schema: {
+              type: 'string',
+              enum: ['PENDING', 'PROCESSING', 'RESOLVED', 'FAILED'],
+            },
+            description: 'Filter by ticket processing status',
+          },
+          {
+            name: 'search',
+            in: 'query',
+            required: false,
+            schema: {
+              type: 'string',
+            },
+            description: 'Search keyword matching ticketNumber, message, orderId, or customer name/ID',
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'List of tickets retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/Ticket' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/tickets/{ticketNumber}': {
+      get: {
+        summary: 'Get Ticket By Number',
+        description: 'Retrieves ticket details including full customer relationship and recent agent execution runs.',
+        parameters: [
+          {
+            name: 'ticketNumber',
+            in: 'path',
+            required: true,
+            schema: { type: 'string', example: 'TCK-001' },
+            description: 'Unique alphanumeric ticket identifier',
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Ticket details retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: { $ref: '#/components/schemas/Ticket' },
+                  },
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Ticket not found',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ErrorResponse' },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/tickets/{ticketNumber}/triage': {
+      post: {
+        summary: 'Start Ticket Autonomous Triage',
+        description:
+          'Initiates an autonomous Gemini function-calling agent session to analyze the ticket, execute tools if required, synthesize a response, and persist the complete step-by-step trace.',
+        parameters: [
+          {
+            name: 'ticketNumber',
+            in: 'path',
+            required: true,
+            schema: { type: 'string', example: 'TCK-001' },
+            description: 'Ticket number to triage',
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Triage execution completed successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: { $ref: '#/components/schemas/AgentExecution' },
+                  },
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Ticket not found',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ErrorResponse' },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict: Ticket is already currently being triaged by an active execution',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ErrorResponse' },
+              },
+            },
+          },
+          '500': {
+            description: 'Agent execution error',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ErrorResponse' },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/tickets/{ticketNumber}/executions': {
+      get: {
+        summary: 'Get Execution History For Ticket',
+        description: 'Returns all past agent execution attempts and their trace logs for a given ticket.',
+        parameters: [
+          {
+            name: 'ticketNumber',
+            in: 'path',
+            required: true,
+            schema: { type: 'string', example: 'TCK-001' },
+            description: 'Ticket number',
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Execution history retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/AgentExecution' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/executions/{executionId}': {
+      get: {
+        summary: 'Get Execution Details & Observability Traces',
+        description:
+          'Returns full details of an execution record along with all chronological ExecutionTrace events (AGENT_DECISION, TOOL_CALL, TOOL_RESULT, AGENT_RESPONSE, ERROR).',
+        parameters: [
+          {
+            name: 'executionId',
+            in: 'path',
+            required: true,
+            schema: { type: 'string', format: 'uuid' },
+            description: 'UUID of the agent execution',
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Execution and traces retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: { $ref: '#/components/schemas/AgentExecution' },
+                  },
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Execution not found',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ErrorResponse' },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  components: {
+    schemas: {
+      Customer: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          externalId: { type: 'string', example: 'USR-101' },
+          name: { type: 'string', nullable: true, example: 'John Doe' },
+          currentTier: { type: 'string', example: 'Free' },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' },
+        },
+      },
+      Ticket: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          ticketNumber: { type: 'string', example: 'TCK-001' },
+          customerId: { type: 'string', format: 'uuid' },
+          orderId: { type: 'string', nullable: true, example: 'ORD-9012' },
+          message: { type: 'string', example: 'Where is my package #ORD-9012?' },
+          status: {
+            type: 'string',
+            enum: ['PENDING', 'PROCESSING', 'RESOLVED', 'FAILED'],
+            example: 'PENDING',
+          },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' },
+          customer: { $ref: '#/components/schemas/Customer' },
+        },
+      },
+      ExecutionTrace: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          executionId: { type: 'string', format: 'uuid' },
+          step: { type: 'integer', example: 1 },
+          eventType: {
+            type: 'string',
+            enum: ['AGENT_DECISION', 'TOOL_CALL', 'TOOL_RESULT', 'AGENT_RESPONSE', 'ERROR'],
+            example: 'TOOL_CALL',
+          },
+          toolName: { type: 'string', nullable: true, example: 'get_order_status' },
+          message: { type: 'string', example: 'Invoked tool get_order_status' },
+          parameters: { type: 'object', nullable: true },
+          output: { type: 'object', nullable: true },
+          durationMs: { type: 'integer', nullable: true, example: 25 },
+          createdAt: { type: 'string', format: 'date-time' },
+        },
+      },
+      AgentExecution: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          ticketId: { type: 'string', format: 'uuid' },
+          status: {
+            type: 'string',
+            enum: ['RUNNING', 'COMPLETED', 'FAILED'],
+            example: 'COMPLETED',
+          },
+          resolutionTag: {
+            type: 'string',
+            enum: ['AUTO_RESOLVE', 'ESCALATE_TO_SALES'],
+            nullable: true,
+            example: 'AUTO_RESOLVE',
+          },
+          customerResponse: { type: 'string', nullable: true },
+          summary: { type: 'string', nullable: true },
+          errorMessage: { type: 'string', nullable: true },
+          startedAt: { type: 'string', format: 'date-time' },
+          completedAt: { type: 'string', format: 'date-time', nullable: true },
+          traces: {
+            type: 'array',
+            items: { $ref: '#/components/schemas/ExecutionTrace' },
+          },
+        },
+      },
+      HealthResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: true },
+          data: {
+            type: 'object',
+            properties: {
+              status: { type: 'string', example: 'healthy' },
+              database: { type: 'string', example: 'connected' },
+              uptimeSeconds: { type: 'integer', example: 120 },
+              timestamp: { type: 'string', format: 'date-time' },
+              service: { type: 'string', example: 'SupportDesk Agent Backend' },
+            },
+          },
+        },
+      },
+      ErrorResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: false },
+          error: {
+            type: 'object',
+            properties: {
+              message: { type: 'string', example: 'Resource not found' },
+              details: { type: 'object' },
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
