@@ -14,7 +14,7 @@ const envSchema = z.object({
     }
     return '';
   }),
-  GEMINI_MODEL: z.string().default('gemini-2.5-flash'),
+  GEMINI_MODEL: z.string().default('gemini-3.5-flash-lite'),
 });
 
 export type Env = z.infer<typeof envSchema>;
