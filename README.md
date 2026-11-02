@@ -68,7 +68,7 @@ SupportDesk Agent implements a clean architecture with layer separation:
 - Runtime Validation: Zod
 - Structured Logging: Pino & Pino-Pretty
 - API Documentation: OpenAPI 3.0 & Swagger UI
-- Testing: Vitest (38 unit + 11 integration tests)
+- Testing: Vitest (6 test suites, 54 tests)
 - Containerization: Docker & Docker Compose
 
 ---
@@ -108,16 +108,20 @@ backend/
 │   ├── modules/
 │   │   ├── tickets/
 │   │   ├── customers/
-│   │   └── agent/
-│   │       ├── triage-agent.ts
-│   │       ├── gemini.provider.ts
-│   │       ├── tool-executor.ts
-│   │       ├── tool-definitions.ts
-│   │       ├── trace.service.ts
-│   │       ├── agent.schema.ts
-│   │       ├── agent.service.ts
-│   │       ├── agent.controller.ts
-│   │       └── agent.routes.ts
+│   │   ├── agent/
+│   │   │   ├── triage-agent.ts
+│   │   │   ├── gemini.provider.ts
+│   │   │   ├── tool-executor.ts
+│   │   │   ├── tool-definitions.ts
+│   │   │   ├── trace.service.ts
+│   │   │   ├── agent.schema.ts
+│   │   │   ├── agent.service.ts
+│   │   │   ├── agent.controller.ts
+│   │   │   └── agent.routes.ts
+│   │   └── system/
+│   │       ├── system.service.ts
+│   │       ├── system.controller.ts
+│   │       └── system.routes.ts
 │   │
 │   ├── routes/
 │   │   └── index.ts
@@ -132,6 +136,7 @@ backend/
     ├── agent.test.ts
     ├── ticket.service.test.ts
     ├── agent.service.test.ts
+    ├── system.test.ts
     └── api.test.ts
 ```
 
@@ -247,7 +252,12 @@ Swagger UI is available interactively at http://localhost:5000/api/docs.
 | GET | /api/tickets/:ticketNumber | Get ticket details and customer metadata |
 | POST | /api/tickets/:ticketNumber/triage | Start autonomous triage execution |
 | GET | /api/tickets/:ticketNumber/executions | View execution history for a ticket |
+| GET | /api/executions | List all agent triage executions across the system |
 | GET | /api/executions/:executionId | View full execution details with traces |
+| GET | /api/system/info | System metadata, active model, uptime, entity counts |
+| POST | /api/system/reset-pending | Reset all tickets to pending and clear test runs |
+| POST | /api/system/reseed | Reseed and restore the customer sample dataset |
+| POST | /api/system/clear | Clear all triage execution records |
 
 ---
 
@@ -434,9 +444,56 @@ Response (200 OK):
 
 ---
 
+### 5. System Status and Database Diagnostics
+
+```bash
+curl http://localhost:5000/api/system/info
+```
+
+Response (200 OK):
+```json
+{
+  "success": true,
+  "data": {
+    "status": "healthy",
+    "database": "connected",
+    "geminiModel": "gemini-3.5-flash-lite",
+    "nodeEnv": "development",
+    "uptimeSeconds": 1420,
+    "counts": {
+      "tickets": 3,
+      "executions": 5,
+      "customers": 3
+    }
+  }
+}
+```
+
+---
+
+### 6. Reset Tickets to Pending for Clean Demo Re-Runs
+
+```bash
+curl -X POST http://localhost:5000/api/system/reset-pending
+```
+
+Response (200 OK):
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Reset all tickets to PENDING and purged test executions.",
+    "ticketsReset": 3,
+    "executionsCleared": 5
+  }
+}
+```
+
+---
+
 ## 10. Testing Suite
 
-The repository contains 49 automated tests across 5 test suites. Tests run offline with mocked Gemini responses without incurring API charges.
+The repository contains 54 automated tests across 6 test suites. Tests run offline with mocked Gemini responses without incurring API charges.
 
 ```bash
 npm test
@@ -468,7 +525,12 @@ npm run build
   - State machine transitions (PENDING -> PROCESSING -> RESOLVED).
   - Error state handling (FAILED ticket & execution, allowing retry).
   - Execution history lookup with traces.
-- tests/api.test.ts (11 tests):
+- tests/system.test.ts (4 tests):
+  - System metadata and record count retrieval.
+  - Ticket reset to pending status and execution cleanup.
+  - Idempotent customer dataset re-seeding.
+  - Execution log clearing and database verification.
+- tests/api.test.ts (12 tests):
   - HTTP server integration tests on ephemeral port.
   - Request validation middleware (422 Unprocessable Entity).
   - Health check endpoint probe.
