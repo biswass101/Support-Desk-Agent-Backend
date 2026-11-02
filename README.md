@@ -272,9 +272,12 @@ Swagger UI is available interactively at http://localhost:5000/api/docs.
 ### Step 1: Install Dependencies
 
 ```bash
-cd Support-Desk-Agent-Backend
+cd backend
 npm install
 ```
+
+> [!NOTE]
+> Backend dependencies install directly using standard `npm install`. When installing the companion frontend service, use `npm install --legacy-peer-deps` or `npm install --force` if npm raises an `ERESOLVE` peer dependency conflict due to React 19.
 
 ### Step 2: Configure Environment Variables
 
