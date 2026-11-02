@@ -216,6 +216,32 @@ export const swaggerDocument = {
         },
       },
     },
+    '/api/executions': {
+      get: {
+        summary: 'List All Agent Executions',
+        description:
+          'Retrieves all past agent execution records across all tickets ordered by creation time descending, including associated ticket and execution traces.',
+        responses: {
+          '200': {
+            description: 'List of all agent executions retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/AgentExecution' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     '/api/executions/{executionId}': {
       get: {
         summary: 'Get Execution Details & Observability Traces',
@@ -250,6 +276,74 @@ export const swaggerDocument = {
             content: {
               'application/json': {
                 schema: { $ref: '#/components/schemas/ErrorResponse' },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/system/info': {
+      get: {
+        summary: 'Get System Diagnostics & Metadata',
+        description:
+          'Returns system diagnostics including database connectivity status, Gemini model configuration, Node environment, process uptime, and record counts for tickets, executions, and customers.',
+        responses: {
+          '200': {
+            description: 'System diagnostics retrieved successfully',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/SystemInfoResponse' },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/system/reset-to-pending': {
+      post: {
+        summary: 'Reset Tickets to Pending',
+        description:
+          'Resets all tickets in the database to PENDING status and removes all execution trace logs and agent execution records.',
+        responses: {
+          '200': {
+            description: 'Tickets successfully reset to pending state',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/SystemActionResponse' },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/system/reseed': {
+      post: {
+        summary: 'Reseed Evaluation Dataset',
+        description:
+          'Clears all existing database records and reseeds the standard customer and ticket evaluation dataset.',
+        responses: {
+          '200': {
+            description: 'Evaluation dataset reseeded successfully',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/SystemActionResponse' },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/system/clear-all': {
+      post: {
+        summary: 'Clear All Data',
+        description:
+          'Clears all tickets, customers, executions, and execution trace records from the database.',
+        responses: {
+          '200': {
+            description: 'All database records cleared successfully',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/SystemActionResponse' },
               },
             },
           },
@@ -332,6 +426,9 @@ export const swaggerDocument = {
             type: 'array',
             items: { $ref: '#/components/schemas/ExecutionTrace' },
           },
+          ticket: {
+            $ref: '#/components/schemas/Ticket',
+          },
         },
       },
       HealthResponse: {
@@ -346,6 +443,48 @@ export const swaggerDocument = {
               uptimeSeconds: { type: 'integer', example: 120 },
               timestamp: { type: 'string', format: 'date-time' },
               service: { type: 'string', example: 'SupportDesk Agent Backend' },
+            },
+          },
+        },
+      },
+      SystemInfoResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: true },
+          data: {
+            type: 'object',
+            properties: {
+              status: { type: 'string', example: 'healthy' },
+              database: { type: 'string', example: 'connected' },
+              geminiModel: { type: 'string', example: 'gemini-2.5-flash' },
+              nodeEnv: { type: 'string', example: 'development' },
+              uptimeSeconds: { type: 'integer', example: 120 },
+              counts: {
+                type: 'object',
+                properties: {
+                  tickets: { type: 'integer', example: 3 },
+                  executions: { type: 'integer', example: 5 },
+                  customers: { type: 'integer', example: 3 },
+                },
+              },
+            },
+          },
+        },
+      },
+      SystemActionResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: true },
+          data: {
+            type: 'object',
+            properties: {
+              message: {
+                type: 'string',
+                example: 'Database reset to pending triage state successfully',
+              },
+              ticketsCount: { type: 'integer', nullable: true, example: 3 },
+              seededTickets: { type: 'integer', nullable: true, example: 3 },
+              seededCustomers: { type: 'integer', nullable: true, example: 3 },
             },
           },
         },

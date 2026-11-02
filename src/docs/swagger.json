@@ -51,7 +51,12 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": ["PENDING", "PROCESSING", "RESOLVED", "FAILED"]
+              "enum": [
+                "PENDING",
+                "PROCESSING",
+                "RESOLVED",
+                "FAILED"
+              ]
             },
             "description": "Filter by ticket processing status"
           },
@@ -73,10 +78,15 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": { "type": "boolean", "example": true },
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
                     "data": {
                       "type": "array",
-                      "items": { "$ref": "#/components/schemas/Ticket" }
+                      "items": {
+                        "$ref": "#/components/schemas/Ticket"
+                      }
                     }
                   }
                 }
@@ -95,7 +105,10 @@
             "name": "ticketNumber",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "example": "TCK-001" },
+            "schema": {
+              "type": "string",
+              "example": "TCK-001"
+            },
             "description": "Unique alphanumeric ticket identifier"
           }
         ],
@@ -107,8 +120,13 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": { "type": "boolean", "example": true },
-                    "data": { "$ref": "#/components/schemas/Ticket" }
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Ticket"
+                    }
                   }
                 }
               }
@@ -118,7 +136,9 @@
             "description": "Ticket not found",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
               }
             }
           }
@@ -134,7 +154,10 @@
             "name": "ticketNumber",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "example": "TCK-001" },
+            "schema": {
+              "type": "string",
+              "example": "TCK-001"
+            },
             "description": "Ticket number to triage"
           }
         ],
@@ -146,8 +169,13 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": { "type": "boolean", "example": true },
-                    "data": { "$ref": "#/components/schemas/AgentExecution" }
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AgentExecution"
+                    }
                   }
                 }
               }
@@ -157,7 +185,9 @@
             "description": "Ticket not found",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
               }
             }
           },
@@ -165,7 +195,9 @@
             "description": "Conflict: Ticket is already currently being triaged by an active execution",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
               }
             }
           },
@@ -173,7 +205,9 @@
             "description": "Agent execution error",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
               }
             }
           }
@@ -189,7 +223,10 @@
             "name": "ticketNumber",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "example": "TCK-001" },
+            "schema": {
+              "type": "string",
+              "example": "TCK-001"
+            },
             "description": "Ticket number"
           }
         ],
@@ -201,10 +238,45 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": { "type": "boolean", "example": true },
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
                     "data": {
                       "type": "array",
-                      "items": { "$ref": "#/components/schemas/AgentExecution" }
+                      "items": {
+                        "$ref": "#/components/schemas/AgentExecution"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/executions": {
+      "get": {
+        "summary": "List All Agent Executions",
+        "description": "Retrieves all past agent execution records across all tickets ordered by creation time descending, including associated ticket and execution traces.",
+        "responses": {
+          "200": {
+            "description": "List of all agent executions retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AgentExecution"
+                      }
                     }
                   }
                 }
@@ -223,7 +295,10 @@
             "name": "executionId",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
             "description": "UUID of the agent execution"
           }
         ],
@@ -235,8 +310,13 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": { "type": "boolean", "example": true },
-                    "data": { "$ref": "#/components/schemas/AgentExecution" }
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AgentExecution"
+                    }
                   }
                 }
               }
@@ -246,7 +326,81 @@
             "description": "Execution not found",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/system/info": {
+      "get": {
+        "summary": "Get System Diagnostics & Metadata",
+        "description": "Returns system diagnostics including database connectivity status, Gemini model configuration, Node environment, process uptime, and record counts for tickets, executions, and customers.",
+        "responses": {
+          "200": {
+            "description": "System diagnostics retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/system/reset-to-pending": {
+      "post": {
+        "summary": "Reset Tickets to Pending",
+        "description": "Resets all tickets in the database to PENDING status and removes all execution trace logs and agent execution records.",
+        "responses": {
+          "200": {
+            "description": "Tickets successfully reset to pending state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemActionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/system/reseed": {
+      "post": {
+        "summary": "Reseed Evaluation Dataset",
+        "description": "Clears all existing database records and reseeds the standard customer and ticket evaluation dataset.",
+        "responses": {
+          "200": {
+            "description": "Evaluation dataset reseeded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemActionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/system/clear-all": {
+      "post": {
+        "summary": "Clear All Data",
+        "description": "Clears all tickets, customers, executions, and execution trace records from the database.",
+        "responses": {
+          "200": {
+            "description": "All database records cleared successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemActionResponse"
+                }
               }
             }
           }
@@ -259,90 +413,309 @@
       "Customer": {
         "type": "object",
         "properties": {
-          "id": { "type": "string", "format": "uuid" },
-          "externalId": { "type": "string", "example": "USR-101" },
-          "name": { "type": "string", "nullable": true, "example": "John Doe" },
-          "currentTier": { "type": "string", "example": "Free" },
-          "createdAt": { "type": "string", "format": "date-time" },
-          "updatedAt": { "type": "string", "format": "date-time" }
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "externalId": {
+            "type": "string",
+            "example": "USR-101"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "example": "John Doe"
+          },
+          "currentTier": {
+            "type": "string",
+            "example": "Free"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
         }
       },
       "Ticket": {
         "type": "object",
         "properties": {
-          "id": { "type": "string", "format": "uuid" },
-          "ticketNumber": { "type": "string", "example": "TCK-001" },
-          "customerId": { "type": "string", "format": "uuid" },
-          "orderId": { "type": "string", "nullable": true, "example": "ORD-9012" },
-          "message": { "type": "string", "example": "Where is my package #ORD-9012?" },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketNumber": {
+            "type": "string",
+            "example": "TCK-001"
+          },
+          "customerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "nullable": true,
+            "example": "ORD-9012"
+          },
+          "message": {
+            "type": "string",
+            "example": "Where is my package #ORD-9012?"
+          },
           "status": {
             "type": "string",
-            "enum": ["PENDING", "PROCESSING", "RESOLVED", "FAILED"],
+            "enum": [
+              "PENDING",
+              "PROCESSING",
+              "RESOLVED",
+              "FAILED"
+            ],
             "example": "PENDING"
           },
-          "createdAt": { "type": "string", "format": "date-time" },
-          "updatedAt": { "type": "string", "format": "date-time" },
-          "customer": { "$ref": "#/components/schemas/Customer" }
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/Customer"
+          }
         }
       },
       "ExecutionTrace": {
         "type": "object",
         "properties": {
-          "id": { "type": "string", "format": "uuid" },
-          "executionId": { "type": "string", "format": "uuid" },
-          "step": { "type": "integer", "example": 1 },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "executionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "step": {
+            "type": "integer",
+            "example": 1
+          },
           "eventType": {
             "type": "string",
-            "enum": ["AGENT_DECISION", "TOOL_CALL", "TOOL_RESULT", "AGENT_RESPONSE", "ERROR"],
+            "enum": [
+              "AGENT_DECISION",
+              "TOOL_CALL",
+              "TOOL_RESULT",
+              "AGENT_RESPONSE",
+              "ERROR"
+            ],
             "example": "TOOL_CALL"
           },
-          "toolName": { "type": "string", "nullable": true, "example": "get_order_status" },
-          "message": { "type": "string", "example": "Invoked tool get_order_status" },
-          "parameters": { "type": "object", "nullable": true },
-          "output": { "type": "object", "nullable": true },
-          "durationMs": { "type": "integer", "nullable": true, "example": 25 },
-          "createdAt": { "type": "string", "format": "date-time" }
+          "toolName": {
+            "type": "string",
+            "nullable": true,
+            "example": "get_order_status"
+          },
+          "message": {
+            "type": "string",
+            "example": "Invoked tool get_order_status"
+          },
+          "parameters": {
+            "type": "object",
+            "nullable": true
+          },
+          "output": {
+            "type": "object",
+            "nullable": true
+          },
+          "durationMs": {
+            "type": "integer",
+            "nullable": true,
+            "example": 25
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
         }
       },
       "AgentExecution": {
         "type": "object",
         "properties": {
-          "id": { "type": "string", "format": "uuid" },
-          "ticketId": { "type": "string", "format": "uuid" },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketId": {
+            "type": "string",
+            "format": "uuid"
+          },
           "status": {
             "type": "string",
-            "enum": ["RUNNING", "COMPLETED", "FAILED"],
+            "enum": [
+              "RUNNING",
+              "COMPLETED",
+              "FAILED"
+            ],
             "example": "COMPLETED"
           },
           "resolutionTag": {
             "type": "string",
-            "enum": ["AUTO_RESOLVE", "ESCALATE_TO_SALES"],
+            "enum": [
+              "AUTO_RESOLVE",
+              "ESCALATE_TO_SALES"
+            ],
             "nullable": true,
             "example": "AUTO_RESOLVE"
           },
-          "customerResponse": { "type": "string", "nullable": true },
-          "summary": { "type": "string", "nullable": true },
-          "errorMessage": { "type": "string", "nullable": true },
-          "startedAt": { "type": "string", "format": "date-time" },
-          "completedAt": { "type": "string", "format": "date-time", "nullable": true },
+          "customerResponse": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "errorMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
           "traces": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/ExecutionTrace" }
+            "items": {
+              "$ref": "#/components/schemas/ExecutionTrace"
+            }
+          },
+          "ticket": {
+            "$ref": "#/components/schemas/Ticket"
           }
         }
       },
       "HealthResponse": {
         "type": "object",
         "properties": {
-          "success": { "type": "boolean", "example": true },
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
           "data": {
             "type": "object",
             "properties": {
-              "status": { "type": "string", "example": "healthy" },
-              "database": { "type": "string", "example": "connected" },
-              "uptimeSeconds": { "type": "integer", "example": 120 },
-              "timestamp": { "type": "string", "format": "date-time" },
-              "service": { "type": "string", "example": "SupportDesk Agent Backend" }
+              "status": {
+                "type": "string",
+                "example": "healthy"
+              },
+              "database": {
+                "type": "string",
+                "example": "connected"
+              },
+              "uptimeSeconds": {
+                "type": "integer",
+                "example": 120
+              },
+              "timestamp": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "service": {
+                "type": "string",
+                "example": "SupportDesk Agent Backend"
+              }
+            }
+          }
+        }
+      },
+      "SystemInfoResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "example": "healthy"
+              },
+              "database": {
+                "type": "string",
+                "example": "connected"
+              },
+              "geminiModel": {
+                "type": "string",
+                "example": "gemini-2.5-flash"
+              },
+              "nodeEnv": {
+                "type": "string",
+                "example": "development"
+              },
+              "uptimeSeconds": {
+                "type": "integer",
+                "example": 120
+              },
+              "counts": {
+                "type": "object",
+                "properties": {
+                  "tickets": {
+                    "type": "integer",
+                    "example": 3
+                  },
+                  "executions": {
+                    "type": "integer",
+                    "example": 5
+                  },
+                  "customers": {
+                    "type": "integer",
+                    "example": 3
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "SystemActionResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string",
+                "example": "Database reset to pending triage state successfully"
+              },
+              "ticketsCount": {
+                "type": "integer",
+                "nullable": true,
+                "example": 3
+              },
+              "seededTickets": {
+                "type": "integer",
+                "nullable": true,
+                "example": 3
+              },
+              "seededCustomers": {
+                "type": "integer",
+                "nullable": true,
+                "example": 3
+              }
             }
           }
         }
@@ -350,12 +723,20 @@
       "ErrorResponse": {
         "type": "object",
         "properties": {
-          "success": { "type": "boolean", "example": false },
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
           "error": {
             "type": "object",
             "properties": {
-              "message": { "type": "string", "example": "Resource not found" },
-              "details": { "type": "object" }
+              "message": {
+                "type": "string",
+                "example": "Resource not found"
+              },
+              "details": {
+                "type": "object"
+              }
             }
           }
         }
@@ -363,4 +744,3 @@
     }
   }
 }
-

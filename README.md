@@ -255,9 +255,9 @@ Swagger UI is available interactively at http://localhost:5000/api/docs.
 | GET | /api/executions | List all agent triage executions across the system |
 | GET | /api/executions/:executionId | View full execution details with traces |
 | GET | /api/system/info | System metadata, active model, uptime, entity counts |
-| POST | /api/system/reset-pending | Reset all tickets to pending and clear test runs |
+| POST | /api/system/reset-to-pending | Reset all tickets to pending and clear test runs |
 | POST | /api/system/reseed | Reseed and restore the customer sample dataset |
-| POST | /api/system/clear | Clear all triage execution records |
+| POST | /api/system/clear-all | Clear all tickets, customers, and execution records |
 
 ---
 
@@ -474,7 +474,7 @@ Response (200 OK):
 ### 6. Reset Tickets to Pending for Clean Demo Re-Runs
 
 ```bash
-curl -X POST http://localhost:5000/api/system/reset-pending
+curl -X POST http://localhost:5000/api/system/reset-to-pending
 ```
 
 Response (200 OK):
@@ -482,9 +482,8 @@ Response (200 OK):
 {
   "success": true,
   "data": {
-    "message": "Reset all tickets to PENDING and purged test executions.",
-    "ticketsReset": 3,
-    "executionsCleared": 5
+    "message": "Database reset to pending triage state successfully",
+    "ticketsCount": 3
   }
 }
 ```
