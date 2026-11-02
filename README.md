@@ -76,7 +76,7 @@ SupportDesk Agent implements a clean architecture with layer separation:
 ## 3. Project Structure
 
 ```
-backend/
+Support-Desk-Agent-Backend/
 ├── Dockerfile
 ├── docker-compose.yml
 ├── package.json
@@ -272,7 +272,7 @@ Swagger UI is available interactively at http://localhost:5000/api/docs.
 ### Step 1: Install Dependencies
 
 ```bash
-cd backend
+cd Support-Desk-Agent-Backend
 npm install
 ```
 
