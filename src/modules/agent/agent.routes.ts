@@ -9,6 +9,8 @@ const executionParamSchema = z.object({
   executionId: z.string().uuid('executionId must be a valid UUID'),
 });
 
+router.get('/', agentController.listExecutions);
+
 router.get(
   '/:executionId',
   validateRequest({ params: executionParamSchema }),

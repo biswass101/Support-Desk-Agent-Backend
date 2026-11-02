@@ -151,6 +151,27 @@ describe('REST API Endpoints Integration', () => {
     });
   });
 
+  describe('GET /api/executions', () => {
+    it('should return list of all executions', async () => {
+      const mockExecutions = [
+        {
+          id: '123e4567-e89b-12d3-a456-426614174000',
+          status: ExecutionStatus.COMPLETED,
+          resolutionTag: ResolutionTag.AUTO_RESOLVE,
+          traces: [],
+        },
+      ];
+      vi.spyOn(agentService, 'listExecutions').mockResolvedValue(mockExecutions as any);
+
+      const res = await fetch(`${baseUrl}/api/executions`);
+      expect(res.status).toBe(200);
+      const json = (await res.json()) as any;
+      expect(json.success).toBe(true);
+      expect(Array.isArray(json.data)).toBe(true);
+      expect(json.data.length).toBe(1);
+    });
+  });
+
   describe('GET /api/executions/:executionId', () => {
     it('should return full execution details for valid UUID', async () => {
       const validUuid = '123e4567-e89b-12d3-a456-426614174000';

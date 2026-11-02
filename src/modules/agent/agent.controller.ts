@@ -24,6 +24,15 @@ export class AgentController {
     }
   };
 
+  public listExecutions = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const executions = await this.service.listExecutions();
+      res.status(200).json(successResponse(executions));
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public getExecution = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { executionId } = req.params;

@@ -121,6 +121,22 @@ export class AgentService {
     }
   }
 
+  public async listExecutions() {
+    return this.prisma.agentExecution.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        ticket: {
+          include: {
+            customer: true,
+          },
+        },
+        traces: {
+          orderBy: { step: 'asc' },
+        },
+      },
+    });
+  }
+
   public async getExecutionDetails(executionId: string) {
     const execution = await this.prisma.agentExecution.findUnique({
       where: { id: executionId },
