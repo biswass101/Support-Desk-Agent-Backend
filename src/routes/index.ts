@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { ticketRoutes } from '../modules/tickets/ticket.routes.js';
 import { executionRoutes } from '../modules/agent/agent.routes.js';
+import { systemRoutes } from '../modules/system/system.routes.js';
 import { prisma } from '../config/database.js';
 import { successResponse } from '../common/types/api-response.js';
 
@@ -34,5 +35,6 @@ router.get('/health', async (_req: Request, res: Response) => {
 
 router.use('/tickets', ticketRoutes);
 router.use('/executions', executionRoutes);
+router.use('/system', systemRoutes);
 
 export const appRouter = router;
