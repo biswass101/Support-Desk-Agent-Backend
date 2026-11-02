@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TicketStatus {
+  PENDING
+  PROCESSING
+  RESOLVED
+  FAILED
+}
+
+enum ExecutionStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum ResolutionTag {
+  AUTO_RESOLVE
+  ESCALATE_TO_SALES
+}
+
+enum TraceEventType {
+  AGENT_DECISION
+  TOOL_CALL
+  TOOL_RESULT
+  AGENT_RESPONSE
+  ERROR
+}
+
+model Customer {
+  id          String   @id @default(uuid()) @db.Uuid
+  externalId  String   @unique
+  name        String?
+  currentTier String   @default("Free")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tickets Ticket[]
+
+  @@map("customers")
+}
+
+model Ticket {
+  id           String       @id @default(uuid()) @db.Uuid
+  ticketNumber String       @unique
+  customerId   String       @db.Uuid
+  orderId      String?
+  message      String       @db.Text
+  status       TicketStatus @default(PENDING)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  customer   Customer         @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  executions AgentExecution[]
+
+  @@index([customerId])
+  @@index([status])
+  @@index([ticketNumber])
+  @@map("tickets")
+}
+
+model AgentExecution {
+  id               String           @id @default(uuid()) @db.Uuid
+  ticketId         String           @db.Uuid
+  status           ExecutionStatus  @default(RUNNING)
+  resolutionTag    ResolutionTag?
+  customerResponse String?          @db.Text
+  summary          String?          @db.Text
+  errorMessage     String?          @db.Text
+  startedAt        DateTime         @default(now())
+  completedAt      DateTime?
+  createdAt        DateTime         @default(now())
+
+  ticket Ticket           @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  traces ExecutionTrace[]
+
+  @@index([ticketId])
+  @@index([status])
+  @@map("agent_executions")
+}
+
+model ExecutionTrace {
+  id          String         @id @default(uuid()) @db.Uuid
+  executionId String         @db.Uuid
+  step        Int
+  eventType   TraceEventType
+  toolName    String?
+  message     String         @db.Text
+  parameters  Json?
+  output      Json?
+  durationMs  Int?
+  createdAt   DateTime       @default(now())
+
+  execution AgentExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+
+  @@index([executionId])
+  @@index([executionId, step])
+  @@map("execution_traces")
+}
+
